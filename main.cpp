@@ -54,9 +54,15 @@ float scale_Z = 1.0;
 float s_ambient = 1;
 float s_diffuse = 1;
 float s_specular = 1;
-float p_ambient = 1;
-float p_diffuse = 1;
-float p_specular = 1;
+
+float p_ambient1 = 1;
+float p_diffuse1 = 1;
+float p_specular1 = 1;
+
+float p_ambient2 = 1;
+float p_diffuse2 = 1;
+float p_specular2 = 1;
+
 float d_ambient = 1;
 float d_diffuse = 1;
 float d_specular = 1;
@@ -79,7 +85,9 @@ bool ambientonOff = true;
 bool diffuseonOff = true;
 bool specularonOff = true;
 
-bool pointlightonOff = true;
+bool pointlightonOff1 = true;
+bool pointlightonOff2 = true;
+
 bool directionallightonOff = true;
 bool spotlightonOff = true;
 
@@ -381,7 +389,7 @@ int main()
     // render loop
     // -----------
     SpotLight spotlight[2];// , spotlight1[3];
-    PointLight pointlight[1];
+    PointLight pointlight[2];
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -404,7 +412,7 @@ int main()
         lightingShader.use();
         lightingShader.setVec3("viewPos", camera.Position);
 
-
+        //spot lights
         spotlight[0].position = glm::vec3(0.875, 1.75, -6);
         spotlight[0].Number = 0;
         spotlight[0].s_ambient = s_ambient;
@@ -412,7 +420,6 @@ int main()
         spotlight[0].s_specular = s_specular;
         spotlight[0].setUpspotLight(lightingShader);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-
 
         spotlight[1].position = glm::vec3(0.875, 1.75, 0);
         spotlight[1].Number = 1;
@@ -423,14 +430,22 @@ int main()
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         
-        //Pointlight
-        
-        pointlight[0].position = glm::vec3(7.5, 2.75, -3.5);
+        //Pointlights
+
+        pointlight[0].position = glm::vec3(7.5, 2.75, -6.15);
         pointlight[0].Number = 0;
-        pointlight[0].p_ambient = p_ambient;
-        pointlight[0].p_diffuse = p_diffuse;
-        pointlight[0].p_specular = p_specular;
+        pointlight[0].p_ambient = p_ambient1;
+        pointlight[0].p_diffuse = p_diffuse1;
+        pointlight[0].p_specular = p_specular1;
         pointlight[0].setUpPointLight(lightingShader);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+        pointlight[1].position = glm::vec3(7.5, 2.75, -0.15);
+        pointlight[1].Number = 1;
+        pointlight[1].p_ambient = p_ambient2;
+        pointlight[1].p_diffuse = p_diffuse2;
+        pointlight[1].p_specular = p_specular2;
+        pointlight[1].setUpPointLight(lightingShader);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     
         
@@ -447,6 +462,7 @@ int main()
         //glm::mat4 view = basic_camera.createViewMatrix();
         lightingShader.setMat4("view", view);
 
+        //Directional light
         glm::vec3 d_a = glm::vec3(0.3f, 0.3f, 0.3f) * d_ambient;
         glm::vec3 d_d = glm::vec3(0.6f, 0.6f, 0.6f) * d_diffuse;
         glm::vec3 d_s = glm::vec3(1.0f, 1.0f, 1.0f) * d_specular;
@@ -456,18 +472,18 @@ int main()
         lightingShader.setVec3("direcLight.specular", d_s);
         lightingShader.setBool("dlighton", directionallightonOff);
 
-
+        //Emissive light
         glm::vec3 e_a = glm::vec3(0.1f, 0.1f, 0.1f) * d_ambient;
-        glm::vec3 e_d = glm::vec3(0.8f, 0.8f, 0.8f) * d_diffuse;
-        glm::vec3 e_s = glm::vec3(1.0f, 1.0f, 1.0f) * d_specular;
-        lightingShader.setVec3("emissionlight.position", 5, 3, 3.0);
+        glm::vec3 e_d = glm::vec3(0.1f, 0.1f, 0.1f) * d_diffuse;
+        glm::vec3 e_s = glm::vec3(0.2f, 0.2f, 0.2f) * d_specular;
+        lightingShader.setVec3("emissionlight.position", 2.5, 2.75, -3.150);
         lightingShader.setVec3("emissionlight.ambient", e_a);
         lightingShader.setVec3("emissionlight.diffuse", e_d);
         lightingShader.setVec3("emissionlight.specular", e_s);
         lightingShader.setFloat("emissionlightk_c", 1);
         lightingShader.setFloat("emissionlight.k_l", .08);
         lightingShader.setFloat("emissionlight.k_q", .03);
-        lightingShader.setVec3("emissionlight.emission", 0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("emissionlight.emission", 0.01f, 0.01f, 0.01f);
         lightingShader.setBool("elighton", false);
 
         // Modelling Transformation
@@ -662,7 +678,13 @@ void scene(unsigned int& cubeVAO, unsigned int& cVAO, Shader& lightingShader, Sh
     //-------------------------------------------------------------------
     
     //tube light left
-    model = transforamtion(7.5, 2.75, -3.5, -.5, -0.15, -0.5);
+    model = transforamtion(7.5, 2.75, -6.15, -.5, -0.15, -0.5);
+    drawCylinder(cVAO, lightingShader, model, 1, 1, 1);
+    //drawCube(cubeVAO, lightingShader, model, 1, 1, 1);
+
+
+    //tube light left
+    model = transforamtion(7.5, 2.75, -.15, -.5, -0.15, -0.5);
     drawCylinder(cVAO, lightingShader, model, 1, 1, 1);
     //drawCube(cubeVAO, lightingShader, model, 1, 1, 1);
     
@@ -802,22 +824,38 @@ void processInput(GLFWwindow* window)
             directionallightonOff = true;
     }
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-        if (pointlightonOff) {
-            pointlightonOff = false;
-            p_ambient = 0;
-            p_diffuse = 0;
-            p_specular = 0;
+        if (pointlightonOff1) {
+            pointlightonOff1 = false;
+            p_ambient1 = 0;
+            p_diffuse1 = 0;
+            p_specular1 = 0;
         }
 
         else {
-            pointlightonOff = true;
-            p_ambient = 1;
-            p_diffuse = 1;
-            p_specular = 1;
+            pointlightonOff1 = true;
+            p_ambient1 = 1;
+            p_diffuse1 = 1;
+            p_specular1 = 1;
         }
 
     }
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+        if (pointlightonOff2) {
+            pointlightonOff2 = false;
+            p_ambient2 = 0;
+            p_diffuse2 = 0;
+            p_specular2 = 0;
+        }
+
+        else {
+            pointlightonOff2 = true;
+            p_ambient2 = 1;
+            p_diffuse2 = 1;
+            p_specular2 = 1;
+        }
+
+    }
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
         if (spotlightonOff) {
             spotlightonOff = false;
             s_ambient = 0;
@@ -833,14 +871,16 @@ void processInput(GLFWwindow* window)
         }
 
     }
-    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS) {
         if (ambientonOff) {
             ambientonOff = false;
             if (directionallightonOff) {
                 d_ambient = 0;
             }
-            if (pointlightonOff) {
-                p_ambient = 0;
+            if (pointlightonOff1 and pointlightonOff2) {
+                p_ambient1 = 0;
+                p_ambient2 = 0;
+
             }
 
             if (spotlightonOff) {
@@ -854,94 +894,78 @@ void processInput(GLFWwindow* window)
             if (directionallightonOff) {
                 d_ambient = 1;
             }
-            if (pointlightonOff) {
-                p_ambient = 1;
+            if (pointlightonOff1 and pointlightonOff2) {
+                p_ambient1 = 1;
+                p_ambient2 = 1;
+
             }
 
             if (spotlightonOff) {
                 s_ambient = 1;
             }
-
-
-
         }
-
     }
-    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS) {
         if (diffuseonOff) {
             diffuseonOff = false;
             if (directionallightonOff) {
                 d_diffuse = 0;
             }
-            if (pointlightonOff) {
-                p_diffuse = 0;
+            if (pointlightonOff1 and pointlightonOff2) {
+                p_diffuse1 = 0;
+                p_diffuse2 = 0;
+
             }
 
             if (spotlightonOff) {
                 s_diffuse = 0;
             }
-
-
-
         }
-
         else {
             diffuseonOff = true;
             if (directionallightonOff) {
                 d_diffuse = 1;
             }
-            if (pointlightonOff) {
-                p_diffuse = 1;
-            }
+            if (pointlightonOff1 and pointlightonOff2) {
+                p_diffuse1 = 1;
+                p_diffuse2 = 1;
 
+            }
             if (spotlightonOff) {
                 s_diffuse = 1;;
             }
-
-
-
         }
-
     }
-    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS) {
         if (specularonOff) {
             specularonOff = false;
             if (directionallightonOff) {
                 d_specular = 0;
             }
-            if (pointlightonOff) {
-                p_specular = 0;
-            }
+            if (pointlightonOff1 and pointlightonOff2) {
+                p_specular1 = 0;
+                p_specular2 = 0;
 
+            }
             if (spotlightonOff) {
                 s_specular = 0;
             }
-
-
-
         }
-
         else {
             specularonOff = true;
             if (directionallightonOff) {
                 d_specular = 1;
             }
-            if (pointlightonOff) {
-                p_specular = 1;
-            }
+            if (pointlightonOff1 and pointlightonOff2) {
+                p_specular1 = 1;
+                p_specular2 = 1;
 
+            }
             if (spotlightonOff) {
                 s_specular = 1;
             }
-
-
-
         }
-
-
     }
-    
-
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -952,7 +976,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
-
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
